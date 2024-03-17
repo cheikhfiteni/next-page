@@ -64,11 +64,18 @@ def score_link(link_element, base_url, driver):
     
     return score
 
+def is_internal_link_v2(base_url, link):
+    """Check if the link is an internal link."""
+    href = link.get_attribute('href')
+    absolute_href = urljoin(base_url, href)
+    return urlparse(absolute_href).netloc == urlparse(base_url).netloc
+
 def extract_links_and_score(driver, url):
     driver.get(url)
     links = driver.find_elements(By.TAG_NAME, 'a')
+    internal_links = [link for link in links if is_internal_link_v2(url, link)]
     scored_links = []
-    for link in links:
+    for link in internal_links:
         if link.get_attribute('href'):
             score = score_link(link, url, driver)
             scored_links.append((link.get_attribute('href'), score))
